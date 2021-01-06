@@ -1,83 +1,73 @@
-# PRACTICAL 14
+# Practical 15
 """
-RING GAME-
-Create a stack to take in stack of numbers and then simulate a ring game.
-A ring stand is such that only a ring of higher diameter can be placed on lower one.
-The diameters are given by the user the program will compare the diameter of ring at
-stack top with the diameter of ring to be placed if condition specified is true ring
-is added to the stack otherwise keep popping and put them into temporary ring stand
-to arrange them into specific order.
+Create a program to take in a list reg_no, Name,admission_to_class (Nursery, KG, I) and add member functions to
+i) Add data to the queue.
+ii) Display length of the queue.
+iii)Print a report showing number of applications received for admission to each class
 """
-import time
-s = []
-top = None
+q = []
 
 
 def ui():
-    inp = int(input('\nPress 1 to play and add ring.\n\
-Press 2 to Skip chance.\n\
-Press 3 to Quit Game.\n'))
-    if inp == 1:
-        ring = int(input('Enter size of ring: '))
-        print(add_ring(ring))
-        print(show_stack())
-    elif inp == 2:
-        print('You have missed this chance.')
-        print(show_stack())
-    elif inp == 3:
-        print('bye')
+    p = int(input('Press 1 to add entry to queue\n\
+Press 2 to fetch the record in order\n\
+Press 3 to show entire queue of records\n\
+Press 4 to show total no. of applications\n\
+Press 5 to show no. of applications per class\n\
+Press 0 to QUIT.\n'))
+    if p == 0:
+        print('Bye')
         return
-    time.sleep(2)
+    print()
+    if p == 1:
+        reg = input('Enter registration no.: \n')
+        nm = input('Enter Name: \n')
+        cl = input('Enter class being admitted to(Nursery, KG OR I): \n')
+        dat = [reg, nm, cl]
+        enqueue(dat)
+        print('Entry added...\n')
+    elif p == 2:
+        print(dequeue())
+    elif p == 3:
+        print(show_q())
+    elif p == 4:
+        print(f'The no. of applications in record are: {len_q()}')
+    elif p == 5:
+        print('\n\n', fetch_report(), '\n')
+        print()
     ui()
 
 
-def add_ring(ring):
-    print('Adding ring...')
-    if isempty(s):
-        push(s, ring)
-        return 'RING HAS BEEN ADDED.'
-    substack = []
-    peeked_ring = peek()
-    while ring < peeked_ring or peeked_ring == 'UNDERFLOW':
-        push(substack, stk_pop(s))
-        peeked_ring = peek()
-        if peeked_ring == 'UNDERFLOW':
-            break
-    push(s, ring)
-    while not isempty(substack):
-        push(s, stk_pop(substack))
-    return 'RING HAS BEEN ADDED.'
+def fetch_report():
+    queue_backup = q[::]
+    report = {}
+    for _ in range(len_q()):
+        entry = dequeue()[-1]
+        if entry in report:
+            report[entry] += 1
+        else:
+            report[entry] = 1
+    report = '\n'.join([f'{i}:{report[i]}' for i in report])
+    return report
 
 
-def isempty(stk):
-    if len(stk) == 0:
-        return True
-    else:
-        return False
+def show_q():
+    val = ''
+    for i in q:
+        val = val + str(i) + '\n'
+    return val
 
 
-def push(stk, el):
-    stk.append(el)
+def len_q():
+    return len(q)
 
 
-def stk_pop(stk):
-    if len(stk) == 0:
-        return 'UNDERFLOW'
-    else:
-        p = stk.pop()
-        return p
+def enqueue(el):
+    q.append(el)
 
 
-def peek():
-    if len(s) == 0:
-        return 'UNDERFLOW'
-    else:
-        top = len(s) - 1
-        return s[top]
-
-
-def show_stack():
-    return f'The current stack is {s}\n'
+def dequeue():
+    return q.pop(0)
 
 
 ui()
