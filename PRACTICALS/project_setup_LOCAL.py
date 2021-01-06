@@ -41,3 +41,15 @@ The thing that used to worry him most was the fact that people always used to as
 He worked in local radio which he always used to tell his friends was a lot more interesting than they probably thought.\n\
 It was, too—most of his friends worked in advertising. ')
     print('File for Practical-4 generated...')
+# prac-6
+with open('placement.csv', mode='w', newline='') as f:
+    fields = ["SNO", "NAME", "MARKS1", "MARKS2", "MARKS3", "MARKS4", "MARKS5"]
+    writer = csv.DictWriter(f, fieldnames=fields)
+    writer.writeheader()
+    row_lists = [["1", "JOHN", "4", "3", "4", "2", "5"],
+                 ["2", "PETER", "3", "4", "4", "3", "5"]]
+    for row_list in row_lists:
+        row_dict = {fields[i]: row_list[i] for i in range(len(row_list))}
+        writer.writerow(row_dict)
+    print('File for Practical-6 generated...')
+
