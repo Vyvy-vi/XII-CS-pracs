@@ -4,6 +4,7 @@ from prettytable import PrettyTable
 
 import tkinter as tk
 from tkinter import scrolledtext as st
+from tkinter import messagebox
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -11,37 +12,49 @@ load_dotenv()
 DB_USER = os.environ['MYSQL_USER']
 DB_PASS = os.environ['MYSQL_PASS']
 
-con = mysql.connector.connect(
-           host='localhost',
-           user=DB_USER,
-           password=DB_PASS,
-           database='cs_practicals'
-          )
+class DataLayer:
+    def __init__(self):
+        self.con = mysql.connector.connect(
+                         host='localhost',
+                         user = DB_USER,
+                         password = DB_PASS,
+                         database='cs_practicals'
+                   )
+        self.cur = self.con.cursor()
+    def fetch_data(self):
+        self.cur.close()
+        self.cur = self.con.cursor()
+        self.cur.execute("SELECT BusNo, Origin, Dest, Rate, Km FROM BUS;")
+        table = PrettyTable()
+        table.field_names = ["BusNo", "Origin", "Dest", "Rate", "Km"]
+        table.add_rows(self.cur.fetchall())
+        print(table)
+        return str(table)
+    def create_table(self):
+        with open('schema.sql', 'r') as schema:
+            queries = self.cur.execute(schema.read(), multi=True)
+            for query in queries:
+                print(query)
+                print(f'{query.rowcount} rows affected')
+            self.con.commit()
+    def update_data(self, data):
+        self.cur.close()
+        self.cur = self.con.cursor()
+        try:
+            self.cur.execute("INSERT INTO BUS VALUES(%s, %s, %s, %s, %s)",
+                    (data[0],
+                     data[1],
+                     data[2],
+                     data[3],
+                     data[4],
+                    ))
+            self.con.commit()
+            messagebox.showinfo('SUCCESS', 'Successfully added to db')
 
-cur = con.cursor()
-
-def add_data():
-    return
-def create_table():
-    with open('schema.sql', 'r') as schema:
-        res_iter = cur.execute(schema.read(), multi=True)
-        con.commit()
-def fetch_data():
-    cur.execute("SELECT BusNo, Origin, Dest, Rate, Km FROM BUS;")
-    table = PrettyTable()
-    table.add_rows(cur.fetchall())
-    print(table)
-    print(type(table))
-    return str(table)
-
-
-def fetch_longest_word():
-    word="theword"
-    return len(word)+1
-
-def edit(i):
-    print(i)
-
+        except Exception as e:
+            if isinstance(e, mysql.connector.errors.IntegrityError):
+                messagebox.showerror('ERROR', f'Record with BusNo={data[0]} exists...\nPlease Try again.')
+        print(self.fetch_data)
 class UserInterface:
     def __init__(self, parent):
         parent.title('BUS GUI')
@@ -50,10 +63,10 @@ class UserInterface:
 
         self.container1 = tk.Frame(parent)
         self.container1.pack()
-        self.data = st.ScrolledText(self.scroll_container, height=40, width= len(fetch_data().split('\n')[0]))
+        self.data = st.ScrolledText(self.scroll_container, height=40, width= len(DataLayer().fetch_data().split('\n')[0]))
         self.data.pack()
         self.scroll_container.pack()
-        self.data.insert(tk.INSERT, fetch_data())
+        self.data.insert(tk.INSERT, DataLayer().fetch_data())
         self.data.configure(state ='disabled')
         self.add_button = tk.Button(self.container1, command=self.add_data)
         self.add_button["text"]= "Add new record"
@@ -100,17 +113,26 @@ class UserInterface:
         self.km.grid(row=5, column=0)
         self.km_entry.grid(row=5, column=1)
 
-        self.write_data = tk.Button(self.container2, command= self.commit)
+        self.write_data = tk.Button(self.container2, command= self.commit_data)
         self.write_data["text"] = "Write values to Database"
         self.write_data.grid(row=6, column=0, columnspan=2)
     def refresh_data(self):
         self.data.configure(state='normal')
         self.data.delete(1.0, tk.END)
-        self.data.configure(width=len(fetch_data().split('\n')[0]))
-        self.data.insert(tk.INSERT, fetch_data())
+        self.data.configure(width=len(DataLayer().fetch_data().split('\n')[0]))
+        self.data.insert(tk.INSERT, DataLayer().fetch_data())
         self.data.configure(state ='disabled')
+    def commit_data(self):
+        bus_no = self.bus_no_entry.get()
+        origin = self.origin_entry.get()
+        dest = self.dest_entry.get()
+        rate = self.rate_entry.get()
+        km = self.km_entry.get()
+        data = [bus_no, origin, dest, rate, km]
+        DataLayer().update_data(data)
+
 if __name__ == '__main__':
-    create_table()
+    DataLayer().create_table()
     window = tk.Tk()
     gui = UserInterface(window)
     window.mainloop()
