@@ -63,7 +63,7 @@ class UserInterface:
 
         self.container1 = tk.Frame(parent)
         self.container1.pack()
-        self.data = st.ScrolledText(self.scroll_container, height=40, width= len(DataLayer().fetch_data().split('\n')[0]))
+        self.data = st.ScrolledText(self.scroll_container, height=20, width= len(DataLayer().fetch_data().split('\n')[0]))
         self.data.pack()
         self.scroll_container.pack()
         self.data.insert(tk.INSERT, DataLayer().fetch_data())
@@ -130,6 +130,7 @@ class UserInterface:
         km = self.km_entry.get()
         data = [bus_no, origin, dest, rate, km]
         DataLayer().update_data(data)
+
 
 if __name__ == '__main__':
     DataLayer().create_table()
