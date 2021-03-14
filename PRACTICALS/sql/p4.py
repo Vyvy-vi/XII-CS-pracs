@@ -1,5 +1,7 @@
 import os
 import mysql.connector
+
+# PrettyTable is used here to format the table in the GUI
 from prettytable import PrettyTable
 
 import tkinter as tk
@@ -9,10 +11,12 @@ from tkinter import messagebox
 from dotenv import load_dotenv
 load_dotenv()
 
-DB_USER = os.environ['MYSQL_USER']
-DB_PASS = os.environ['MYSQL_PASS']
+# Environment variables from .env
+DB_USER = os.environ['MYSQL_USER'] # MySQL Username
+DB_PASS = os.environ['MYSQL_PASS'] # MySQL User Password
 
 class DataLayer:
+    """Class to handle database interactions with MySQL"""
     def __init__(self):
         self.con = mysql.connector.connect(
                          host='localhost',
@@ -21,7 +25,9 @@ class DataLayer:
                          database='cs_practicals'
                    )
         self.cur = self.con.cursor()
+
     def fetch_data(self):
+        """Function to fetch data from the db"""
         self.cur.close()
         self.cur = self.con.cursor()
         self.cur.execute("SELECT BusNo, Origin, Dest, Rate, Km FROM BUS;")
@@ -30,14 +36,18 @@ class DataLayer:
         table.add_rows(self.cur.fetchall())
         print(table)
         return str(table)
+
     def create_table(self):
+        """Function to seed data from schema.sql"""
         with open('schema.sql', 'r') as schema:
             queries = self.cur.execute(schema.read(), multi=True)
             for query in queries:
                 print(query)
                 print(f'{query.rowcount} rows affected')
             self.con.commit()
+
     def update_data(self, data):
+        """Add new records to the table"""
         self.cur.close()
         self.cur = self.con.cursor()
         try:
@@ -55,7 +65,9 @@ class DataLayer:
             if isinstance(e, mysql.connector.errors.IntegrityError):
                 messagebox.showerror('ERROR', f'Record with BusNo={data[0]} exists...\nPlease Try again.')
         print(self.fetch_data)
+
 class UserInterface:
+    """Class to handle the gui used by the user"""
     def __init__(self, parent):
         parent.title('BUS GUI')
         tk.Label(parent, text="Bus GUI database management").pack()
@@ -68,13 +80,17 @@ class UserInterface:
         self.scroll_container.pack()
         self.data.insert(tk.INSERT, DataLayer().fetch_data())
         self.data.configure(state ='disabled')
+
+        # Button for triggering the container with Entry elements for adding more records
         self.add_button = tk.Button(self.container1, command=self.add_data)
         self.add_button["text"]= "Add new record"
         self.add_button.grid(row=1, column=0)
 
+        # Refresh Button, to refresh the table showed in the GUI
         self.refresh_button = tk.Button(self.container1, command=self.refresh_data)
         self.refresh_button["text"] = "Refresh database"
         self.refresh_button.grid(row=1, column=1)
+
     def add_data(self):
         """function to build interface for adding values and handling addition of new record to db"""
         self.container2 = tk.Frame(self.container1)
@@ -116,25 +132,35 @@ class UserInterface:
         self.write_data = tk.Button(self.container2, command= self.commit_data)
         self.write_data["text"] = "Write values to Database"
         self.write_data.grid(row=6, column=0, columnspan=2)
+
     def refresh_data(self):
+        """Function to refresh the data displayed by the Interface"""
         self.data.configure(state='normal')
         self.data.delete(1.0, tk.END)
         self.data.configure(width=len(DataLayer().fetch_data().split('\n')[0]))
         self.data.insert(tk.INSERT, DataLayer().fetch_data())
         self.data.configure(state ='disabled')
+
     def commit_data(self):
+        """Function to fetch the data from the Entry elements and to send these as a new record in the db via the DataLayer class methods"""
         bus_no = self.bus_no_entry.get()
         origin = self.origin_entry.get()
         dest = self.dest_entry.get()
         rate = self.rate_entry.get()
         km = self.km_entry.get()
         data = [bus_no, origin, dest, rate, km]
+
+        # Update this data in the db
         DataLayer().update_data(data)
 
 
 if __name__ == '__main__':
+    # Create the table and seed data
     DataLayer().create_table()
+
+    # Main window for the application
     window = tk.Tk()
     gui = UserInterface(window)
+
     window.mainloop()
 
