@@ -22,7 +22,7 @@ t_l = Label(wind, text='Enter time: ').grid(row=3, column=0)
 p = Entry(wind)
 p.grid(row=1, column=1)
 r = Entry(wind)
-r.grid(row=2, column[?12; 4$y=1)
+r.grid(row=2, column=1)
 t= Entry(wind)
 t.grid(row=3, column=1)
 

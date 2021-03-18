@@ -84,7 +84,7 @@ def stay2():
     print("\nCustomers who have stayed longer than 2 days:")
     L = logd(1)
     L = [i for i in L if i['Duration'] > 2]
-    print(_ for _ in L)
+    print(list(_ for _ in L))
 
 
 ui()

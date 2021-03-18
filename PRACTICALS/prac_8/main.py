@@ -6,10 +6,10 @@ def main():
             "2- Check if a number is prime",
             "3- Check if a number is a perfect no.",
             "4- Check if a number is prime and get factors for that no.",
-            "5- Check if a number is a pefect no. and get factors for that no.",
+            "5- Check if a number is a perfect no. and get factors for that no.",
             "6- Quit this program"
             ]
-    WELCOME_MSG = "\nHello, welcome to pratical #8:\n\
+    WELCOME_MSG = "\nHello, welcome to practical #8:\n\
 Menu driven program for getting list of factors,\n\
 checking if a number is prime,\n\
 and to check if a number is a perfect no.\n\n"
