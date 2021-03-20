@@ -1,3 +1,4 @@
+CREATE DATABASE IF NOT EXISTS cs_practicals;
 USE cs_practicals;
 
 CREATE TABLE IF NOT EXISTS BUS(
